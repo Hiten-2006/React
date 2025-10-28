@@ -6,27 +6,38 @@ const useFetch = (url) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        setTimeout(() => {
-            fetch(url) // Use the 'url' argument
-                .then(res => {
-                    if (!res.ok) {
-                        throw Error("Could not fetch data from the resource");
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    setData(data); // Set 'data'
-                    setIsPending(false);
-                    setError(null);
-                })
-                .catch(err => {
+        // The PDF uses a 5-second timeout, but for a final app
+        // you'd probably remove it. I'll remove it here.
+        
+        // Add AbortController for cleanup
+        const abortCont = new AbortController();
+
+        fetch(url, { signal: abortCont.signal })
+            .then(res => {
+                if (!res.ok) {
+                    throw Error("Could not fetch data from the resource");
+                }
+                return res.json();
+            })
+            .then(data => {
+                setData(data);
+                setIsPending(false);
+                setError(null);
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') {
+                    console.log('fetch aborted');
+                } else {
                     setIsPending(false);
                     setError(err.message);
-                })
-        }, 5000); 
-    }, [url]); // Add 'url' to the dependency array
+                }
+            });
+        
+        // Cleanup function
+        return () => abortCont.abort();
 
-    // Return the three values
+    }, [url]);
+
     return { data, isPending, error };
 }
 
