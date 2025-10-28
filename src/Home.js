@@ -4,7 +4,7 @@ import useFetch from './useFetch';
 const Home = () => {
     
     // We can rename 'data' to 'blogs'
-    const { data: blogs, isPending, error } = useFetch('http://localhost:8000/blogs');
+    const { data: blogs, isPending, error } = useFetch('https://react-json-bprp.onrender.com');
 
     return ( 
         <div className="home">
